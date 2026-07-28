@@ -39,6 +39,10 @@ const searchVehicleSchema = z.object({
   maxPrice: priceFilter,
 });
 
+const qtySchema = z.object({
+  qty: z.number().int('must be an integer').positive('must be greater than zero').default(1),
+});
+
 export const vehicleRouter = Router();
 
 vehicleRouter.use(requireAuth);
@@ -48,3 +52,5 @@ vehicleRouter.get('/', vehicleController.list);
 vehicleRouter.get('/search', validate(searchVehicleSchema, 'query'), vehicleController.search);
 vehicleRouter.put('/:id', validate(updateVehicleSchema), vehicleController.update);
 vehicleRouter.delete('/:id', requireAdmin, vehicleController.remove);
+vehicleRouter.post('/:id/purchase', validate(qtySchema), vehicleController.purchase);
+vehicleRouter.post('/:id/restock', requireAdmin, validate(qtySchema), vehicleController.restock);

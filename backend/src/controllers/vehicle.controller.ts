@@ -34,6 +34,22 @@ export const update = async (req: Request, res: Response, next: NextFunction): P
   }
 };
 
+export const purchase = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    res.status(200).json(await vehicleService.purchase(req.params.id, req.body.qty));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const restock = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    res.status(200).json(await vehicleService.restock(req.params.id, req.body.qty));
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const remove = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     await vehicleService.remove(req.params.id);
