@@ -10,6 +10,11 @@ export interface RegisterInput {
   password: string;
 }
 
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
 export interface AuthResult {
   token: string;
   user: ReturnType<User['toJSON']>;
@@ -34,6 +39,18 @@ export const register = async ({ name, email, password }: RegisterInput): Promis
     email: normalizedEmail,
     passwordHash: await bcrypt.hash(password, env.bcryptSaltRounds),
   });
+
+  return issue(user);
+};
+
+export const login = async ({ email, password }: LoginInput): Promise<AuthResult> => {
+  const user = await User.findOne({ where: { email: normalizeEmail(email) } });
+
+  // Same message for unknown email and wrong password so the API cannot be used
+  // to enumerate registered accounts.
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    throw new HttpError(401, 'Invalid credentials');
+  }
 
   return issue(user);
 };
