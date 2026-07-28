@@ -20,11 +20,31 @@ const updateVehicleSchema = createVehicleSchema.partial().refine(
   { message: 'At least one field must be provided' },
 );
 
+const priceFilter = z
+  .string()
+  .refine((value) => value.trim() !== '' && !Number.isNaN(Number(value)), 'must be a number')
+  .transform(Number)
+  .refine((value) => value >= 0, 'must be zero or greater')
+  .optional();
+
+const searchVehicleSchema = z.object({
+  make: z.string().trim().min(1).optional(),
+  model: z.string().trim().min(1).optional(),
+  category: z
+    .enum(VEHICLE_CATEGORIES, {
+      errorMap: () => ({ message: `must be one of ${VEHICLE_CATEGORIES.join(', ')}` }),
+    })
+    .optional(),
+  minPrice: priceFilter,
+  maxPrice: priceFilter,
+});
+
 export const vehicleRouter = Router();
 
 vehicleRouter.use(requireAuth);
 
 vehicleRouter.post('/', validate(createVehicleSchema), vehicleController.create);
 vehicleRouter.get('/', vehicleController.list);
+vehicleRouter.get('/search', validate(searchVehicleSchema, 'query'), vehicleController.search);
 vehicleRouter.put('/:id', validate(updateVehicleSchema), vehicleController.update);
 vehicleRouter.delete('/:id', requireAdmin, vehicleController.remove);

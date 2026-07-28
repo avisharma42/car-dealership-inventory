@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import * as vehicleService from '../services/vehicle.service';
+import type { SearchVehicleFilters } from '../services/vehicle.service';
 
 export const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -12,6 +13,14 @@ export const create = async (req: Request, res: Response, next: NextFunction): P
 export const list = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     res.status(200).json(await vehicleService.list());
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    res.status(200).json(await vehicleService.search(req.query as unknown as SearchVehicleFilters));
   } catch (err) {
     next(err);
   }
